@@ -1,0 +1,62 @@
+<!--
+
+    Copyright (C) 2013 salesforce.com, inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<aura:component model="java://org.auraframework.test.testsetrunner.lunaHistoryModel" >
+    <!-- Indicates what type of tests we want to run. Default is every type except 'hybrid_container' tests -->
+    <aura:attribute name="branchName" type="String"/>
+    <br/>
+    <div id="jenkinsURL">
+        Login to Luna atleast once before loading the report below: 
+        <ui:outputUrl label="link" alt="Open Luna Page" title="Open Luna Page" value="https://build.soma.salesforce.com/build" target="_blank"/>
+    </div>
+    
+    <div id="jenkinsURL">
+        Test Report, Jenkins URL for <ui:outputText aura:id="totalFailure" value="{!v.branchName}"/> build:
+        <ui:outputUrl label="link" alt="Open Jenkins Page" title="Open Jenkins Page" value="{!m.jenkinsURL}" target="_blank"/>
+    </div>
+    <div id="totalFailure">
+        Total Test Failures: <ui:outputText aura:id="totalFailure" value="{!m.currentFailCount}"/>
+    </div>
+    <div>
+    <table>
+    <thead>
+    <th>Test Class</th>
+    <th>Test Name</th>
+    <!--<th>Last Run Status</th>-->
+    <th>Luna History</th>
+    </thead>
+    <tbody>
+    <aura:foreach items="{!m.testsHistory}" var="t">
+        <tr>
+	        <td>
+	        	{!t.className}
+	        </td>
+	        <td>
+	        	{!t.name}
+	        </td>
+	        <!--<td class="{!t.status}">
+	        	{!t.status}
+	        </td>-->
+	        <td >
+		    	<ui:outputUrl alt="Open Luna History" title="Open Luna History" value="{!t.url}" iconClass="jsConsoleIcon" target="_blank"/>
+		    </td>
+       </tr>
+    </aura:foreach>
+    </tbody>
+    </table>
+     </div>
+</aura:component>
