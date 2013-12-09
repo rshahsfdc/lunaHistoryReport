@@ -55,9 +55,9 @@ public class lunaHistoryModel {
 	public static final String API_JSON = "api/json";
 	private static final Map<String, String> BRANCH = new HashMap<String, String>();
     static {
-    	BRANCH.put("main", "http://download.auraframework.org:8080/job/core-aura-integration/lastCompletedBuild/testReport/");
-    	BRANCH.put("patch", "http://download.auraframework.org:8080/view/188-patch/job/02b-main-aura-integation-188-patch/lastCompletedBuild/testReport/");
-    	BRANCH.put("freeze", "http://download.auraframework.org:8080/view/freeze/job/02b-main-aura-integation-freeze/lastCompletedBuild/testReport/");
+    	BRANCH.put("main", "http://download.auraframework.org:8080/job/core-aura-integration/");
+    	BRANCH.put("patch", "http://download.auraframework.org:8080/view/188-patch/job/02b-main-aura-integation-188-patch/");
+    	BRANCH.put("freeze", "http://download.auraframework.org:8080/view/freeze/job/02b-main-aura-integation-freeze/");
     }
     private static final Map<String, String> BRANCHID = new HashMap<String, String>();
     static {
@@ -70,6 +70,7 @@ public class lunaHistoryModel {
 	private final List<Object> alltestFailures;
 	private int currFailCount;
 	private String branchName;
+	private Integer buildNumber;
 	private String jenkinsURL;
 	private String branchId;
 	
@@ -79,12 +80,22 @@ public class lunaHistoryModel {
         BaseComponent<?, ?> component = context.getCurrentComponent();
 
         branchName = (String) component.getAttributes().getValue("branchName");
+        buildNumber = Integer.parseInt(component.getAttributes().getValue("buildNumber").toString());
 		try{
 			JSONArray  jsonArray = null;
 			JSONObject  jsonDict = null;
 			String className = null, testName = null;
 			jenkinsURL = BRANCH.get(branchName.toLowerCase());
 			branchId = BRANCHID.get(branchName.toLowerCase());
+			
+			//Support to get test history from Previous build
+			if(buildNumber > 0){
+				jenkinsURL += buildNumber;
+			}
+			else{
+				jenkinsURL += "lastCompletedBuild";
+			}
+			jenkinsURL += "/testReport/";
 			JSONObject json = getJsonFromJenkins(jenkinsURL + API_JSON);
 			 jsonArray = (JSONArray)json.get("suites");
 			 currFailCount = json.getInt("failCount");

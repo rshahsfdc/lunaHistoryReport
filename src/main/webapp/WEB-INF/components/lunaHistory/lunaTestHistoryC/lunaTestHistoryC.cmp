@@ -18,6 +18,7 @@
 <aura:component model="java://org.auraframework.test.testsetrunner.lunaHistoryModel" >
     <!-- Indicates what type of tests we want to run. Default is every type except 'hybrid_container' tests -->
     <aura:attribute name="branchName" type="String"/>
+    <aura:attribute name="buildNumber" type="Integer"/>
     <br/>
     <div id="jenkinsURL">
         Login to Luna atleast once before loading the report below: 
