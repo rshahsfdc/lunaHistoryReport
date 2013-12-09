@@ -87,60 +87,60 @@ public class lunaHistoryModel {
 			branchId = BRANCHID.get(branchName.toLowerCase());
 			JSONObject json = getJsonFromJenkins(jenkinsURL + API_JSON);
 			 jsonArray = (JSONArray)json.get("suites");
-	         jsonDict = (JSONObject)jsonArray.get(1);
-	         // Getting all test failures
-	         jsonArray = (JSONArray)jsonDict.get("cases");
-	         currFailCount = json.getInt("failCount");
+			 currFailCount = json.getInt("failCount");
 	         if(currFailCount > 0){
-	             for (int dictIndex = 0; dictIndex < jsonArray.length(); dictIndex++) {
-	                 jsonDict = (JSONObject)jsonArray.get(dictIndex);
+	        	 jsonDict = (JSONObject)jsonArray.get(1);
+		         // Getting all test failures
+		         jsonArray = (JSONArray)jsonDict.get("cases");
+		             for (int dictIndex = 0; dictIndex < jsonArray.length(); dictIndex++) {
+		                 jsonDict = (JSONObject)jsonArray.get(dictIndex);
 
-	                 /*
-	                  * Looking at only items That are actual failures. There are two results: FAILED REGRESSED
-	                  */
-	                if (jsonDict.get("status").equals("FAILED") || jsonDict.get("status").equals("REGRESSION")) {
-	                	className = jsonDict.getString("className");
-	                    testName = jsonDict.getString("name");
-	                    String myurl = AUTOBUILD_URL + "?className=" + URLEncoder.encode(className, UTF_ENCODING) + "&testName=" + URLEncoder.encode(testName, "UTF-8") + "&branchId=" + branchId;
-	                    Map<String, Object> testFailure = new HashMap<String, Object>();
-	                	testFailure.put("className", className);
-	                	testFailure.put("name", testName);
-	                	testFailure.put("url", myurl);
-	                	alltestFailures.add(testFailure);
-	                	String login = "userName:pwd";
-	                	  
-	                	String encodedLogin = new String(Base64.encodeBase64(login.getBytes()));
-	                	URL w2lUrl = new URL(myurl);
-	                    URLConnection w2lConnection = w2lUrl.openConnection();
-	                    w2lConnection.setRequestProperty("Authorization", "Basic " + encodedLogin);
-	                    w2lConnection.setDoOutput(true);
-	                    w2lConnection.setReadTimeout(60000);
+		                 /*
+		                  * Looking at only items That are actual failures. There are two results: FAILED REGRESSED
+		                  */
+		                if (jsonDict.get("status").equals("FAILED") || jsonDict.get("status").equals("REGRESSION")) {
+		                	className = jsonDict.getString("className");
+		                    testName = jsonDict.getString("name");
+		                    String myurl = AUTOBUILD_URL + "?className=" + URLEncoder.encode(className, UTF_ENCODING) + "&testName=" + URLEncoder.encode(testName, "UTF-8") + "&branchId=" + branchId;
+		                    Map<String, Object> testFailure = new HashMap<String, Object>();
+		                	testFailure.put("className", className);
+		                	testFailure.put("name", testName);
+		                	testFailure.put("url", myurl);
+		                	alltestFailures.add(testFailure);
+		                	String login = "userName:pwd";
+		                	  
+		                	String encodedLogin = new String(Base64.encodeBase64(login.getBytes()));
+		                	URL w2lUrl = new URL(myurl);
+		                    URLConnection w2lConnection = w2lUrl.openConnection();
+		                    w2lConnection.setRequestProperty("Authorization", "Basic " + encodedLogin);
+		                    w2lConnection.setDoOutput(true);
+		                    w2lConnection.setReadTimeout(60000);
 
-	                    String resultHTML;
-	                    try {
-	                        resultHTML = readStringFromStream(w2lConnection.getInputStream(), false, UTF_ENCODING, 65536);
-	                    } catch (SocketTimeoutException e) {
-	                        resultHTML = null;
-	                    }
-	                    String abstatus = "SUCCESSFUL";
-	                    if (resultHTML == null) {
-	                        abstatus = "Luna timeout";
-	                    } else if (resultHTML.contains("Not Found!")) {
-	                        abstatus = "NOT FOUND";
-	                    } else if (resultHTML.contains("ERROR")) {
-	                        abstatus = "ERROR";
-	                    } else if (resultHTML.contains("FAILURE")) {
-	                        if (resultHTML.contains("DETECTED FLAPPER FAILURE")) {
-	                            abstatus = "FLAPPER";
-	                        } else {
-	                            abstatus = "FAILURE";
-	                        }
-	                    }
-	                    testFailure.put("status", abstatus);
-	                }
-	             }// end of for loop
-	        }
-			}
+		                    String resultHTML;
+		                    try {
+		                        resultHTML = readStringFromStream(w2lConnection.getInputStream(), false, UTF_ENCODING, 65536);
+		                    } catch (SocketTimeoutException e) {
+		                        resultHTML = null;
+		                    }
+		                    String abstatus = "SUCCESSFUL";
+		                    if (resultHTML == null) {
+		                        abstatus = "Luna timeout";
+		                    } else if (resultHTML.contains("Not Found!")) {
+		                        abstatus = "NOT FOUND";
+		                    } else if (resultHTML.contains("ERROR")) {
+		                        abstatus = "ERROR";
+		                    } else if (resultHTML.contains("FAILURE")) {
+		                        if (resultHTML.contains("DETECTED FLAPPER FAILURE")) {
+		                            abstatus = "FLAPPER";
+		                        } else {
+		                            abstatus = "FAILURE";
+		                        }
+		                    }
+		                    testFailure.put("status", abstatus);
+		                }
+		             }// end of for loop
+		        }
+		    }
 	         catch(Exception e){
 		         e.printStackTrace();
 		    }
