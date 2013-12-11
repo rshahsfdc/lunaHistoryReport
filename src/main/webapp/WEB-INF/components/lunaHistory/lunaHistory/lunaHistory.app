@@ -18,6 +18,6 @@
 <aura:application securityProvider="java://org.auraframework.components.security.SecurityProviderAlwaysAllows">
 	<aura:attribute name="branchName" type="String" default="main"/>
 	<aura:attribute name="buildNumber" type="Integer" default="0"/>
-	<lunaHistory:lunaTestHistoryC aura:load="lazy" branchName="{!v.branchName}" buildNumber="{!v.buildNumber}"/>
+	<lunaHistory:lunaTestHistoryC aura:id="app" aura:load="lazy" branchName="{!v.branchName}" buildNumber="{!v.buildNumber}"/>
 	
 </aura:application>

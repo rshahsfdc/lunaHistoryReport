@@ -73,6 +73,11 @@
 	color: #009;
 }
 
+.lunaHistoryLunaTestHistoryC .error
+{
+	color: #FF0000;
+}
+
 .lunaHistoryLunaTestHistoryC .jsConsoleIcon
 {
 	background-image:url('/auraFW/resources/aura/images/test/jsConsole.png');

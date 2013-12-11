@@ -15,10 +15,12 @@
  */
 {
     submit : function(component, event, helper) {
-        // find out who clicked submit and display inputed value
-        var cmpName = event.source.get("v.buttonTitle");
+    	var cmpName = event.source.get("v.buttonTitle");
         var inputCmpName = "in" + cmpName;
         var inputCmpValue = component.find(inputCmpName).get("v.value");
-        //helper.goToServer(this, component, event, cmpName, inputCmpValue);
+        helper.goToServer(this, component, event, cmpName, inputCmpValue);
+    },
+    doInit : function (cmp, event) {
+    	cmp.getValue("v.testsFailures").setValue(cmp.getValue("m.testsHistory"))
     }
 }

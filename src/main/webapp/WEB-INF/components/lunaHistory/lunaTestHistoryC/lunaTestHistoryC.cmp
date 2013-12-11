@@ -15,27 +15,32 @@
     limitations under the License.
 
 -->
-<aura:component model="java://org.auraframework.test.testsetrunner.lunaHistoryModel" >
+<aura:component model="java://org.auraframework.components.Model.lunaHistoryModel" controller="java://org.auraframework.components.Controller.lunaHistoryController">
     <!-- Indicates what type of tests we want to run. Default is every type except 'hybrid_container' tests -->
     <aura:attribute name="branchName" type="String"/>
     <aura:attribute name="buildNumber" type="Integer"/>
+    <!--<aura:attribute name="testsFailures" type="List"/>
+   	<aura:handler name="init" value="{!this}" action="{!c.doInit}"/>-->
     <br/>
+    <ui:spinner aura:id="spinner" isVisible="false"/>
     <div id="jenkinsURL">
         Login to Luna atleast once before loading the report below: 
         <ui:outputUrl label="link" alt="Open Luna Page" title="Open Luna Page" value="https://build.soma.salesforce.com/build" target="_blank"/>
     </div>
-    
     <div id="jenkinsURL">
-        Test Report, Jenkins URL for <ui:outputText aura:id="totalFailure" value="{!v.branchName}"/> build:
+        Jenkins URL for <ui:outputText aura:id="totalFailure" value="{!v.branchName}"/> build:
         <ui:outputUrl label="link" alt="Open Jenkins Page" title="Open Jenkins Page" value="{!m.jenkinsURL}" target="_blank"/>
     </div>
     <div id="totalFailure">
         Total Test Failures: <ui:outputText aura:id="totalFailure" value="{!m.currentFailCount}"/>
     </div>
     <!--<div>
-    	Build Number: <ui:inputSelect aura:id="inSelect" options="{!m.filters}"/>
+    	Previous build Number: <ui:inputSelect aura:id="inSelect" options="{!m.filters}"/>
     	<ui:button buttonTitle="Select" label="submit" press="{!c.submit}"/> <br/>
     </div>-->
+    <div>
+    	<ui:outputText aura:id="outText" value="" class="error"/>
+  	</div>
     <div>
     <table>
     <thead>
@@ -45,8 +50,8 @@
     <th>Luna History</th>
     </thead>
     <tbody>
-    <aura:foreach items="{!m.testsHistory}" var="t">
-        <tr>
+    <aura:foreach items="{!m.testsHistory}" var="t" >
+        <tr aura:id="forEach">
 	        <td>
 	        	{!t.className}
 	        </td>

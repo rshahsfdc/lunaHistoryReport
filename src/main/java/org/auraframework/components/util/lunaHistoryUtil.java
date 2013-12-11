@@ -5,14 +5,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.InflaterInputStream;
 
+import org.apache.commons.codec.binary.Base64;
+import org.auraframework.components.Model.lunaHistoryModel;
 import org.auraframework.components.ui.InputOption;
-import org.auraframework.test.testsetrunner.lunaHistoryModel;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,5 +78,82 @@ public class lunaHistoryUtil {
             filterOptions.add(new InputOption(buildNumber, buildNumber, false, buildUrl));
 		}
 		return filterOptions;
+	}
+
+	public static List<Object> getFailingTests(String reportUrl, String branchName) {
+		JSONArray  jsonArray = null;
+		JSONObject  jsonDict = null;
+		String className = null, testName = null;
+		List<Object> alltestFailures = null;
+		try {
+			JSONObject json = lunaHistoryUtil.getJsonFromJenkins(reportUrl + lunaHistoryModel.API_JSON);
+			jsonArray = (JSONArray)json.get("suites");
+			int currFailCount = json.getInt("failCount");
+			if(currFailCount > 0){
+				alltestFailures = new ArrayList<Object>();
+				String branchId = lunaHistoryModel.BRANCHID.get(branchName.toLowerCase());
+	        	 jsonDict = (JSONObject)jsonArray.get(1);
+		         // Getting all test failures
+		         jsonArray = (JSONArray)jsonDict.get("cases");
+		         for (int dictIndex = 0; dictIndex < jsonArray.length(); dictIndex++) {
+	                 jsonDict = (JSONObject)jsonArray.get(dictIndex);
+
+	                 /*
+	                  * Looking at only items That are actual failures. There are two results: FAILED REGRESSED
+	                  */
+	                if (jsonDict.get("status").equals("FAILED") || jsonDict.get("status").equals("REGRESSION")) {
+	                	className = jsonDict.getString("className");
+	                    testName = jsonDict.getString("name");
+	                    String myurl = lunaHistoryModel.AUTOBUILD_URL + "?className=" + URLEncoder.encode(className, UTF_ENCODING) + "&testName=" + URLEncoder.encode(testName, "UTF-8") + "&branchId=" + branchId;
+	                    Map<String, Object> testFailure = new HashMap<String, Object>();
+	                	testFailure.put("className", className);
+	                	testFailure.put("name", testName);
+	                	testFailure.put("url", myurl);
+	                	alltestFailures.add(testFailure);
+	                	String login = "userName:pwd";
+	                	  
+	                	String encodedLogin = new String(Base64.encodeBase64(login.getBytes()));
+	                	URL w2lUrl = new URL(myurl);
+	                    URLConnection w2lConnection = w2lUrl.openConnection();
+	                    w2lConnection.setRequestProperty("Authorization", "Basic " + encodedLogin);
+	                    w2lConnection.setDoOutput(true);
+	                    w2lConnection.setReadTimeout(60000);
+
+	                    String resultHTML;
+	                    try {
+	                        resultHTML = lunaHistoryUtil.readStringFromStream(w2lConnection.getInputStream(), false, UTF_ENCODING, 65536);
+	                    } catch (SocketTimeoutException e) {
+	                        resultHTML = null;
+	                    }
+	                    String abstatus = "SUCCESSFUL";
+	                    if (resultHTML == null) {
+	                        abstatus = "Luna timeout";
+	                    } else if (resultHTML.contains("Not Found!")) {
+	                        abstatus = "NOT FOUND";
+	                    } else if (resultHTML.contains("ERROR")) {
+	                        abstatus = "ERROR";
+	                    } else if (resultHTML.contains("FAILURE")) {
+	                        if (resultHTML.contains("DETECTED FLAPPER FAILURE")) {
+	                            abstatus = "FLAPPER";
+	                        } else {
+	                            abstatus = "FAILURE";
+	                        }
+	                    }
+	                    testFailure.put("status", abstatus);
+	                }
+	             }// end of for loop
+	        }
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return alltestFailures;
+		
 	}
 }
