@@ -32,6 +32,10 @@
     <div id="totalFailure">
         Total Test Failures: <ui:outputText aura:id="totalFailure" value="{!m.currentFailCount}"/>
     </div>
+    <!--<div>
+    	Build Number: <ui:inputSelect aura:id="inSelect" options="{!m.filters}"/>
+    	<ui:button buttonTitle="Select" label="submit" press="{!c.submit}"/> <br/>
+    </div>-->
     <div>
     <table>
     <thead>

@@ -15,13 +15,7 @@
  */
 package org.auraframework.test.testsetrunner;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -29,19 +23,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.InflaterInputStream;
-
 import javax.annotation.concurrent.ThreadSafe;
 
 import org.apache.commons.codec.binary.Base64;
 import org.auraframework.Aura;
+import org.auraframework.components.ui.InputOption;
+import org.auraframework.components.util.lunaHistoryUtil;
 import org.auraframework.instance.BaseComponent;
 import org.auraframework.system.AuraContext;
 import org.auraframework.system.Annotations.AuraEnabled;
 import org.auraframework.system.Annotations.Model;
 import org.auraframework.throwable.quickfix.QuickFixException;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
  
 /**
@@ -53,6 +46,7 @@ import org.json.JSONObject;
 @ThreadSafe
 public class lunaHistoryModel {
 	public static final String API_JSON = "api/json";
+	private List<InputOption> filterOptions;
 	private static final Map<String, String> BRANCH = new HashMap<String, String>();
     static {
     	BRANCH.put("main", "http://download.auraframework.org:8080/job/core-aura-integration/");
@@ -87,7 +81,7 @@ public class lunaHistoryModel {
 			String className = null, testName = null;
 			jenkinsURL = BRANCH.get(branchName.toLowerCase());
 			branchId = BRANCHID.get(branchName.toLowerCase());
-			
+			filterOptions = lunaHistoryUtil.getBuildHistory(jenkinsURL);
 			//Support to get test history from Previous build
 			if(buildNumber > 0){
 				jenkinsURL += buildNumber;
@@ -96,7 +90,7 @@ public class lunaHistoryModel {
 				jenkinsURL += "lastCompletedBuild";
 			}
 			jenkinsURL += "/testReport/";
-			JSONObject json = getJsonFromJenkins(jenkinsURL + API_JSON);
+			JSONObject json = lunaHistoryUtil.getJsonFromJenkins(jenkinsURL + API_JSON);
 			 jsonArray = (JSONArray)json.get("suites");
 			 currFailCount = json.getInt("failCount");
 	         if(currFailCount > 0){
@@ -129,7 +123,7 @@ public class lunaHistoryModel {
 
 		                    String resultHTML;
 		                    try {
-		                        resultHTML = readStringFromStream(w2lConnection.getInputStream(), false, UTF_ENCODING, 65536);
+		                        resultHTML = lunaHistoryUtil.readStringFromStream(w2lConnection.getInputStream(), false, UTF_ENCODING, 65536);
 		                    } catch (SocketTimeoutException e) {
 		                        resultHTML = null;
 		                    }
@@ -163,6 +157,11 @@ public class lunaHistoryModel {
     }
     
     @AuraEnabled
+    public Object getFilters() {
+        return filterOptions;
+    }
+    
+    @AuraEnabled
     public int getCurrentFailCount() {
         return currFailCount;
     }
@@ -170,46 +169,5 @@ public class lunaHistoryModel {
     @AuraEnabled
     public String getJenkinsURL() {
         return jenkinsURL;
-    }
-    
-	public static JSONObject getJsonFromJenkins(String uri) throws IOException, JSONException, URISyntaxException {
-        BufferedReader reader = null;
-        try {
-            URL url = new URL(uri);
-            reader = new BufferedReader(new InputStreamReader(url.openStream()));
-            return new JSONObject(reader.readLine());
-        } finally {
-            if (reader != null) reader.close();
-        }
-    }
-	
-	@SuppressWarnings("resource")
-	public String readStringFromStream(InputStream is, boolean compressed, String encoding, int blobLengthHint) {
-        StringBuilder sb = new StringBuilder(Math.min(blobLengthHint, 32));
-        try {
-            if (compressed) {
-                is = new InflaterInputStream(is);
-            }
-            byte[] buffer = new byte[8192]; // if the buffer size changes, update TextUtilTest.testReadStringFromBlob
-            int bytesRead;
-            while ((bytesRead = is.read(buffer)) > -1) {
-                sb.append(new String(buffer, 0, bytesRead, encoding));
-            }
-        }
-        catch (UnsupportedEncodingException e) {
-            // shouldn't ever happen
-            throw new RuntimeException(e);
-        }
-        catch (IOException e) {
-            return null;
-        }
-        finally {
-            if (is != null)
-                try {
-                    is.close();
-                }
-                catch (IOException x) { /* do nothing */}
-        }
-        return sb.toString();
     }
 }
