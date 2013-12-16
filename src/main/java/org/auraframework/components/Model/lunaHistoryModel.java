@@ -45,7 +45,7 @@ public class lunaHistoryModel {
     static {
     	BRANCH.put("main", "http://download.auraframework.org:8080/job/core-aura-integration/");
     	BRANCH.put("patch", "http://download.auraframework.org:8080/view/188-patch/job/02b-main-aura-integation-188-patch/");
-    	BRANCH.put("freeze", "http://download.auraframework.org:8080/view/freeze/job/02b-main-aura-integation-freeze/");
+    	BRANCH.put("freeze", "http://download.auraframework.org:8080/view/188-freeze/job/02b-main-aura-integation-188-freeze/");
     }
     public static final Map<String, String> BRANCHID = new HashMap<String, String>();
     static {
