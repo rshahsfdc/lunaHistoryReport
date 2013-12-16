@@ -81,8 +81,8 @@ public class lunaHistoryUtil {
 	}
 
 	public static List<Object> getFailingTests(String reportUrl, String branchName) {
-		JSONArray  jsonArray = null;
-		JSONObject  jsonDict = null;
+		JSONArray  jsonArray, jsonIntegrationArray = null, jsonOneArray = null;
+		JSONObject  jsonDictIntegrationResults,jsonDictOneResults, jsonDict = null;
 		String className = null, testName = null;
 		List<Object> alltestFailures = null;
 		try {
@@ -92,9 +92,19 @@ public class lunaHistoryUtil {
 			if(currFailCount > 0){
 				alltestFailures = new ArrayList<Object>();
 				String branchId = lunaHistoryModel.BRANCHID.get(branchName.toLowerCase());
-	        	 jsonDict = (JSONObject)jsonArray.get(1);
-		         // Getting all test failures
-		         jsonArray = (JSONArray)jsonDict.get("cases");
+			
+				// Aura Integration test failures
+				jsonDictIntegrationResults = (JSONObject)jsonArray.get(0);
+			    jsonIntegrationArray = (JSONArray)jsonDictIntegrationResults.get("cases");
+			    
+		        //One Sanity test failures
+		        if(jsonArray.length() == 2){
+		        	jsonDictOneResults = (JSONObject)jsonArray.get(1);
+			        jsonOneArray = (JSONArray)jsonDictOneResults.get("cases");
+			    }
+		        
+		        // Getting all test failures
+		        jsonArray = concatArray(jsonIntegrationArray, jsonOneArray);
 		         for (int dictIndex = 0; dictIndex < jsonArray.length(); dictIndex++) {
 	                 jsonDict = (JSONObject)jsonArray.get(dictIndex);
 
@@ -155,5 +165,18 @@ public class lunaHistoryUtil {
 		}
 		return alltestFailures;
 		
+	}
+	
+	private static JSONArray concatArray(JSONArray... arrs)
+	        throws JSONException {
+	    JSONArray result = new JSONArray();
+	    for (JSONArray arr : arrs) {
+	    	if(arr != null){
+	    		for (int i = 0; i < arr.length(); i++) {
+		            result.put(arr.get(i));
+		        }
+	    	}
+	    }
+	    return result;
 	}
 }
