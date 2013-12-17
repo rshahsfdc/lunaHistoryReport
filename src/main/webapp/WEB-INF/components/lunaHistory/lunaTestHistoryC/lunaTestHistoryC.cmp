@@ -34,6 +34,9 @@
     <div id="totalFailure">
         Total Test Failures: <ui:outputText aura:id="totalFailure" value="{!m.currentFailCount}"/>
     </div>
+    <div id="menu" class="testmenu">
+        Search: <ui:inputSearch class="testSearch" size="40" aura:id="searchText" updateOn="search" search="{!c.filterOnSearchText}" placeholder="Type &amp; Press Enter"/>
+    </div>
     <!--<div>
     	Previous build Number: <ui:inputSelect aura:id="inSelect" options="{!m.filters}"/>
     	<ui:button buttonTitle="Select" label="submit" press="{!c.submit}"/> <br/>
@@ -51,7 +54,7 @@
     </thead>
     <tbody>
     <aura:foreach items="{!m.testsHistory}" var="t" >
-        <tr aura:id="forEach">
+        <tr aura:id="forEach" class="{!t.isHidden}">
 	        <td>
 	        	{!t.className}
 	        </td>

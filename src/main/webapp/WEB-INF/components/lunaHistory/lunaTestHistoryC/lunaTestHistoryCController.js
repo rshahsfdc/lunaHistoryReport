@@ -22,5 +22,9 @@
     },
     doInit : function (cmp, event) {
     	cmp.getValue("v.testsFailures").setValue(cmp.getValue("m.testsHistory"))
-    }
+    },
+    filterOnSearchText : function (cmp, event, helper){
+    	debugger;
+     	helper.updateDisplay(cmp, helper);
+     }
 }

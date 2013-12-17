@@ -119,6 +119,7 @@ public class lunaHistoryUtil {
 	                	testFailure.put("className", className);
 	                	testFailure.put("name", testName);
 	                	testFailure.put("url", myurl);
+	                	testFailure.put("isHidden", "");
 	                	alltestFailures.add(testFailure);
 	                	String login = "userName:pwd";
 	                	  

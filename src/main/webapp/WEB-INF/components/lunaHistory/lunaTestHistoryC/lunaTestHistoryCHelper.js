@@ -45,5 +45,22 @@
         });
 
         $A.enqueueAction(a);
-    }
+    },
+    
+    updateDisplay: function(cmp, helper){    
+        cmp.getValue("m.testsHistory").each(function(map){
+   	 	if(helper.searchFilter(cmp, map)){
+   	 		map.getValue("isHidden").setValue("");
+   	 	}
+   	 	else{
+   	 		map.getValue("isHidden").setValue("HIDDEN");
+   	 	}	     
+        });
+       },
+       
+       searchFilter: function(cmp, propMap){
+    	   var searchText = cmp.find("searchText").get("v.value");
+    	   var testName = propMap.get("className") + "." + propMap.get("name");
+    	   return $A.util.isUndefinedOrNull(searchText) || testName.toLowerCase().indexOf(searchText.toLowerCase()) != -1;  
+       }
 })
