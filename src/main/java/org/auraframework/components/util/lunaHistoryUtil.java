@@ -83,7 +83,7 @@ public class lunaHistoryUtil {
 	public static List<Object> getFailingTests(String reportUrl, String branchName) {
 		JSONArray  jsonArray, jsonIntegrationArray = null, jsonOneArray = null;
 		JSONObject  jsonDictIntegrationResults,jsonDictOneResults, jsonDict = null;
-		String className = null, testName = null;
+		String className = null, testName = null, age = null;
 		List<Object> alltestFailures = null;
 		try {
 			JSONObject json = lunaHistoryUtil.getJsonFromJenkins(reportUrl + lunaHistoryModel.API_JSON);
@@ -114,10 +114,12 @@ public class lunaHistoryUtil {
 	                if (jsonDict.get("status").equals("FAILED") || jsonDict.get("status").equals("REGRESSION")) {
 	                	className = jsonDict.getString("className");
 	                    testName = jsonDict.getString("name");
+	                    age = jsonDict.getString("age");
 	                    String myurl = lunaHistoryModel.AUTOBUILD_URL + "?className=" + URLEncoder.encode(className, UTF_ENCODING) + "&testName=" + URLEncoder.encode(testName, "UTF-8") + "&branchId=" + branchId;
 	                    Map<String, Object> testFailure = new HashMap<String, Object>();
 	                	testFailure.put("className", className);
 	                	testFailure.put("name", testName);
+	                	testFailure.put("age", age);
 	                	testFailure.put("url", myurl);
 	                	testFailure.put("isHidden", "");
 	                	alltestFailures.add(testFailure);
@@ -165,7 +167,6 @@ public class lunaHistoryUtil {
 			e.printStackTrace();
 		}
 		return alltestFailures;
-		
 	}
 	
 	private static JSONArray concatArray(JSONArray... arrs)
